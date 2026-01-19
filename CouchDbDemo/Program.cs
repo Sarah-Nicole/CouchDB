@@ -17,16 +17,38 @@ internal class Program
         }
 
         // -------------------- Neuen Datensatz anlegen --------------------
-        var newCoffee = new CoffeeConsumption
+        List<CoffeeConsumption> coffees = [];
+        coffees.Add(new CoffeeConsumption
         {
             EmployeeName = "Maya",
             CupsPerDay = 5,
             IsStillAlive = true,
-            LastCupTime = DateTime.Today
-        };
-        await context.CoffeeConsumption.AddAsync(newCoffee);
-        Console.WriteLine("Neuer Datensatz angelegt.");
+            LastCupTime = DateTime.Today.AddDays(-2)
+        });
 
+        coffees.Add(new CoffeeConsumption
+        {
+            EmployeeName = "Sarah",
+            CupsPerDay = 3,
+            IsStillAlive = true,
+            LastCupTime = DateTime.Today.AddDays(-2)
+        });
+
+        coffees.Add(new CoffeeConsumption
+        {
+            EmployeeName = "Vesel",
+            CupsPerDay = 15,
+            IsStillAlive = false,
+            LastCupTime = DateTime.Today.AddDays(-2)
+        });
+
+        // AddOrUpdateRangeAsync() könnte für eine Liste auch verwendet werden.
+        foreach (var coffee in coffees) {
+            await context.CoffeeConsumption.AddAsync(coffee);
+            Console.WriteLine("Neuer Datensatz angelegt.");
+        }
+
+        Console.WriteLine("Alle Datensätze angelegt.");
 
         // -------------------- Alle Dokumente --------------------
         var all = await context.CoffeeConsumption.ToListAsync();
@@ -38,6 +60,8 @@ internal class Program
             Console.WriteLine($"{x.EmployeeName} - {x.CupsPerDay} Tassen - {aliveStatus}");
         });
 
+        Console.WriteLine("Alle Datensätze geladen.");
+
         // -------------------- Abfrage nach Name --------------------
         var sarahs = await context.CoffeeConsumption
             .Where(x => x.EmployeeName != null && x.EmployeeName == "Sarah")
@@ -46,14 +70,17 @@ internal class Program
         Console.WriteLine("Mitarbeiter mit 'Sarah':");
         sarahs.ForEach(x => Console.WriteLine($"{x.EmployeeName} - {x.CupsPerDay} Tassen"));
 
+        Console.WriteLine("Datensätze gesucht.");
+
         // -------------------- Bestehenden Datensatz ändern --------------------
-        newCoffee.CupsPerDay = 7;
-        newCoffee.LastCupTime = DateTime.Today;
-        await context.CoffeeConsumption.AddOrUpdateAsync(newCoffee);
+        var myCoffee = coffees[0];
+        myCoffee.CupsPerDay = 7;
+        myCoffee.LastCupTime = DateTime.Today;
+        await context.CoffeeConsumption.AddOrUpdateAsync(myCoffee);
         Console.WriteLine("Datensatz aktualisiert.");
 
         // -------------------- Datensatz löschen --------------------
-        await context.CoffeeConsumption.RemoveAsync(newCoffee);
+        await context.CoffeeConsumption.RemoveAsync(myCoffee);
         Console.WriteLine("Datensatz gelöscht.");
     }
 }
